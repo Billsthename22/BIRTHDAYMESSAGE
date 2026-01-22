@@ -27,7 +27,6 @@
             overflow-x: hidden;
         }
 
-        /* Floating particles effect */
         .ambient-light {
             position: fixed;
             width: 100%; height: 100%;
@@ -78,7 +77,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.5; /* Slightly higher base opacity since labels are gone */
+            opacity: 0.5;
             filter: saturate(0.6);
             transition: 0.8s ease; 
         }
@@ -95,7 +94,7 @@
             transform: scale(1.05);
         }
 
-        /* --- THE ROMANTIC MODAL --- */
+        /* --- MODAL & NAVIGATION --- */
         #videoModal {
             position: fixed;
             top: 0; left: 0;
@@ -110,11 +109,21 @@
             transition: opacity 0.8s ease;
         }
 
-        .modal-content {
+        .modal-container {
+            position: relative;
             width: 90%;
+            max-width: 900px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            width: 100%;
             max-width: 800px;
             transform: scale(0.9);
             transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
         }
 
         #videoModal.show { opacity: 1; display: flex; }
@@ -127,16 +136,51 @@
             border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
-        .close-btn {
-            text-align: center;
+        /* NAVIGATION ARROWS */
+        .nav-arrow {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
             color: var(--soft-rose);
-            margin-top: 20px;
+            border: 1px solid rgba(255, 175, 189, 0.3);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: 0.3s;
+            z-index: 1010;
+            user-select: none;
+        }
+
+        .nav-arrow:hover {
+            background: var(--soft-rose);
+            color: var(--deep-plum);
+            box-shadow: 0 0 20px var(--soft-rose);
+        }
+
+        .prev-arrow { left: -70px; }
+        .next-arrow { right: -70px; }
+
+        .close-btn {
+            margin-top: 25px;
             cursor: pointer;
             font-family: 'Dancing Script', cursive;
             font-size: 1.5rem;
+            color: var(--soft-rose);
+            opacity: 0.8;
+            transition: 0.3s;
         }
 
-        /* Removed the .viewed class entirely to allow replaying */
+        .close-btn:hover { opacity: 1; }
+
+        /* Hide arrows on mobile if they overlap */
+        @media (max-width: 1000px) {
+            .prev-arrow { left: 10px; background: rgba(0,0,0,0.5); }
+            .next-arrow { right: 10px; background: rgba(0,0,0,0.5); }
+        }
     </style>
 </head>
 <body>
@@ -149,62 +193,94 @@
     </header>
 
     <div class="grid">
-        <div class="card" onclick="openPortal('anthonia.MOV')">
-            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
-        </div>
-
-        <div class="card" onclick="openPortal('mary.MOV')">
-            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
-        </div>
-
-        <div class="card" onclick="openPortal('jessica.MOV')">
-            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
-        </div>
-
-        <div class="card" onclick="openPortal('juliet.MOV')">
-            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
-        </div>
-
-        <div class="card" onclick="openPortal('deola.Mov')">
-            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
-        </div>
-
-        <div class="card" onclick="openPortal('ME.MP4')">
-            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
-        </div>
+        <div class="card" onclick="startAt(0)"><img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Video 1"></div>
+        <div class="card" onclick="startAt(1)"><img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500"  alt="Video 2"></div>
+        <div class="card" onclick="startAt(2)"><img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500"  alt="Video 3"></div>
+        <div class="card" onclick="startAt(3)"><img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500"  alt="Video 4"></div>
+        <div class="card" onclick="startAt(4)"><img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500"  alt="Video 5"></div>
+        <div class="card" onclick="startAt(5)"><img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500"  alt="Video 6"></div>
     </div>
 
     <div id="videoModal">
-        <div class="modal-content">
-            <video id="mainVideo" controls></video>
-            <div class="close-btn" onclick="closePortal()">Return to the stars</div>
+        <div class="modal-container">
+            <div class="nav-arrow prev-arrow" onclick="prevVideo()">&#10094;</div>
+            
+            <div class="modal-content">
+                <video id="mainVideo" controls></video>
+                <div class="close-btn" onclick="closePortal()">Return to the stars</div>
+            </div>
+
+            <div class="nav-arrow next-arrow" onclick="nextVideo()">&#10095;</div>
         </div>
-        
     </div>
 
     <script>
         const modal = document.getElementById('videoModal');
         const video = document.getElementById('mainVideo');
 
+        const playlist = [
+            'anthonia.MOV',
+            'mary.MOV',
+            'jessica.MOV',
+            'juliet.MOV',
+            'deola.Mov',
+            'emila.MOV'
+        ];
+
+        let currentIndex = 0;
+
+        function startAt(index) {
+            currentIndex = index;
+            openPortal(playlist[currentIndex]);
+        }
+
         function openPortal(src) {
-            // Removed card.classList.add('viewed') to allow replay
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('show'), 50);
             video.src = src;
             video.play();
         }
 
+        function nextVideo() {
+            currentIndex++;
+            if (currentIndex >= playlist.length) {
+                currentIndex = 0; // Loop back to start or call closePortal()
+            }
+            video.src = playlist[currentIndex];
+            video.play();
+        }
+
+        function prevVideo() {
+            currentIndex--;
+            if (currentIndex < 0) {
+                currentIndex = playlist.length - 1; // Loop to end
+            }
+            video.src = playlist[currentIndex];
+            video.play();
+        }
+
+        // Auto-play next video when current one ends
+        video.onended = function() {
+            if (currentIndex < playlist.length - 1) {
+                nextVideo();
+            } else {
+                // If it was the last video, maybe just stop or close
+                console.log("End of playlist");
+            }
+        };
+
         function closePortal() {
             modal.classList.remove('show');
             setTimeout(() => {
                 modal.style.display = 'none';
                 video.pause();
-                video.src = ""; // Clears the video source so it stops in the background
+                video.src = "";
             }, 800);
         }
 
+        // Close if clicking outside the video container
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) closePortal();
+            if (e.target === modal || e.target.classList.contains('modal-container')) closePortal();
         });
     </script>
 </body>
