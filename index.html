@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Private Correspondence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-pink: #ff00cc;
+            --neon-blue: #00f2ff;
+            --glass: rgba(15, 10, 15, 0.9);
+            --text: #fceaff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #050505;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Pinyon Script', cursive;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .scene {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* The Digital Seal */
+        .seal-wrapper {
+            position: absolute;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.8s ease;
+            z-index: 10;
+        }
+
+        .active .seal-wrapper {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.5);
+        }
+
+        .digital-seal {
+            width: 100px;
+            height: 100px;
+            border: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px var(--neon-blue), inset 0 0 15px var(--neon-blue);
+            transition: all 0.4s ease;
+            background: rgba(0, 0, 0, 0.9);
+            margin: 0 auto;
+        }
+
+        .digital-seal:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px var(--neon-pink);
+            border-color: var(--neon-pink);
+        }
+
+        .digital-seal span { 
+            font-size: 2.5rem; 
+            color: var(--neon-blue);
+            filter: drop-shadow(0 0 8px var(--neon-blue)); 
+        }
+
+        .seal-label {
+            font-family: 'Cinzel', serif;
+            color: var(--text);
+            letter-spacing: 5px;
+            font-size: 0.8rem;
+            margin-top: 20px;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* Centered Message Board */
+        .message-container {
+            position: relative;
+            width: 90vw;
+            max-width: 700px;
+            height: 75vh;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--neon-pink);
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(255, 0, 204, 0.3);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .active .message-container {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .text-content {
+            font-size: 1.8rem;
+            color: var(--text);
+            line-height: 1.6;
+            text-align: center;
+            white-space: pre-wrap;
+            width: 100%;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: var(--neon-blue);
+            margin-left: 5px;
+            vertical-align: middle;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* --- NEXT BUTTON --- */
+        .next-btn {
+            display: none;
+            margin: 60px auto 20px;
+            padding: 15px 40px;
+            font-family: 'Cinzel', serif;
+            background: rgba(255, 0, 204, 0.1);
+            color: var(--text);
+            border: 1px solid var(--neon-pink);
+            border-radius: 50px;
+            cursor: pointer;
+            letter-spacing: 4px;
+            font-size: 0.8rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 15px rgba(255, 0, 204, 0.2);
+            opacity: 0;
+            text-decoration: none;
+            text-align: center;
+            width: fit-content;
+        }
+
+        .next-btn.reveal {
+            display: block;
+            animation: fadeInBtn 2.5s forwards;
+        }
+
+        .next-btn:hover {
+            background: var(--neon-pink);
+            color: black;
+            box-shadow: 0 0 35px var(--neon-pink);
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeInBtn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .text-content { font-size: 1.4rem; }
+            .message-container { padding: 25px; height: 80vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="scene" id="mainScene">
+        <div class="seal-wrapper" onclick="openMessage()">
+            <div class="digital-seal">
+                <span>❦</span>
+            </div>
+            <div class="seal-label">DECRYPT TRANSMISSION</div>
+        </div>
+
+        <div class="message-container" id="board">
+            <div class="text-content">
+                <span id="typedText"></span><span id="cursor" class="cursor"></span>
+            </div>
+            <a href="/video.html" class="next-btn" id="nextBtn">CONTINUE THE JOURNEY</a>
+        </div>
+    </div>
+
+    <script>
+        const audio = new Audio('YOUR_DIRECT_MP3_LINK_HERE');
+        audio.loop = true;
+
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const charList = "01❤23456789❦HAPPY20LOVE";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                ctx.fillStyle = Math.random() > 0.5 ? '#ff00cc' : '#00f2ff';
+                const text = charList[Math.floor(Math.random() * charList.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 60);
+
+        const textEl = document.getElementById('typedText');
+        const boardEl = document.getElementById('board');
+        const nextBtn = document.getElementById('nextBtn');
+
+        async function type(text, speed) {
+            for (let i = 0; i < text.length; i++) {
+                textEl.innerHTML += text.charAt(i);
+                boardEl.scrollTop = boardEl.scrollHeight;
+                await new Promise(r => setTimeout(r, speed));
+            }
+        }
+
+        async function backspace(speed) {
+            let content = textEl.innerHTML;
+            while (content.length > 0) {
+                content = content.slice(0, -1);
+                textEl.innerHTML = content;
+                await new Promise(r => setTimeout(r, speed));
+            }
+        }
+
+        function openMessage() {
+            audio.play().catch(e => console.log("Audio waiting for interaction"));
+            document.getElementById('mainScene').classList.add('active');
+            setTimeout(runSequence, 1200);
+        }
+
+        async function runSequence() {
+            await type("> connecting to heart...\n> hey you you're 20 now .. i remember the first time i met you", 60);
+            await new Promise(r => setTimeout(r, 1000));
+            await type("\n\n> hmmm... let's start over.", 100);
+            await new Promise(r => setTimeout(r, 1200));
+            await backspace(20);
+            await new Promise(r => setTimeout(r, 800));
+
+            const finalMessage = "Hey you❤️.\n\nYou’re 20 now, and I wanted to get this exactly right. \n\nI remember the first time I met you, and honestly, I had no idea you'd become this important to me. Happy 20th birthday 🤍\n\n" +
+            "We’ve had a lot of moments—fights, laughs, hugs, and kisses—and honestly, I wouldn’t trade any of them. Each of those moments, even the hard ones, has only made me realize how much I want to keep showing up for you. It’s through all of that that I’ve learned who you really are, and it's why I'm so certain about how much you mean to me.\n\n" +
+            "I’ve been thinking about what to say because I don’t want this to be just another birthday message. I want you to really understand how much I value you — not just on a day like this, but in general. You’re someone I genuinely appreciate for who you are, even in the moments when you don’t say much, when you pull inward, or when you’re figuring things out quietly on your own.\n\n" +
+            "I saw what you shared about fighting your battles silently, and honestly, it made me understand you even more. I know your silence isn’t distance, and it isn’t you shutting people out. It’s how you process, how you protect yourself, how you grow. You handle things with a kind of strength that doesn’t need to be loud, and I respect that deeply. I don’t take it personally when you go quiet, and I don’t feel entitled to explanations when you’re still finding your footing. I just want you to have the space to be yourself without feeling misunderstood.\n\n" +
+            "What I feel for you comes from a place of patience and sincerity. I’m not here to rush anything, force conversations, or make you feel like you have to show up in a way that isn’t natural to you. I care about you in a calm, steady way — the kind that doesn’t disappear when things get quiet. Even when I don’t always know what’s on your mind, my regard for you doesn’t change. You’re important to me, and that’s something I don’t say lightly.\n\n" +
+            "I admire the way you carry yourself. The way you reflect. The way you choose peace, even when life isn’t simple. There’s a depth to you that most people don’t notice unless they’re paying attention, and I feel lucky that I get to see that side of you. You don’t have to be constantly present or expressive for me to value you. Just being you is already enough.\n\n" +
+            "As you turn 20, I hope this year brings you clarity, healing, and growth in ways that feel right for you. I hope you find moments of peace that remind you how strong you are, and moments of joy that don’t require effort or explanation. I hope you feel supported — even in silence — and reminded that you’re not alone, even when you choose to walk your path quietly.\n\n" +
+            "Most of all, I hope you know that you’re seen, appreciated, and genuinely cared for. Not for who you pretend to be, not for how much you give, but for who you truly are underneath everything. I’m grateful for you, I respect you, and I value you more than I probably show.\n\n"+
+            " Happy birthday — and I truly wish you nothing but good things ahead ❤️\n\n" +
+            "I LOVE YOU !!!!!!";
+
+            await type(finalMessage, 85);
+            document.getElementById('cursor').style.opacity = '0';
+            
+            // Show Button & Scroll
+            nextBtn.classList.add('reveal');
+            boardEl.scrollTo({ top: boardEl.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500&family=Quicksand:wght@300;400&display=swap');
+
+        :root {
+            --romance-gold: #f3e5ab;
+            --soft-rose: #ffafbd;
+            --deep-plum: #2c1639;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            font-family: 'Quicksand', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Floating particles effect */
+        .ambient-light {
+            position: fixed;
+            width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        header { margin: 100px 0 60px; text-align: center; }
+        
+        h1 { 
+            font-family: 'Dancing Script', cursive; 
+            font-size: 4rem; 
+            color: var(--soft-rose);
+            text-shadow: 0 0 20px rgba(255, 175, 189, 0.4);
+        }
+
+        .instruction {
+            letter-spacing: 4px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            opacity: 0.6;
+            margin-top: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 35px;
+            width: 90%;
+            max-width: 1200px;
+            padding-bottom: 100px;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px 100px 20px 20px; 
+            height: 450px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .card img { 
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5; /* Slightly higher base opacity since labels are gone */
+            filter: saturate(0.6);
+            transition: 0.8s ease; 
+        }
+
+        .card:hover { 
+            border-color: var(--soft-rose); 
+            box-shadow: 0 0 40px rgba(255, 175, 189, 0.2);
+            transform: translateY(-15px);
+        }
+
+        .card:hover img { 
+            opacity: 1;
+            filter: saturate(1);
+            transform: scale(1.05);
+        }
+
+        /* --- THE ROMANTIC MODAL --- */
+        #videoModal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(15, 12, 41, 0.95);
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(25px);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 800px;
+            transform: scale(0.9);
+            transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #videoModal.show { opacity: 1; display: flex; }
+        #videoModal.show .modal-content { transform: scale(1); }
+
+        video {
+            width: 100%;
+            border-radius: 30px;
+            box-shadow: 0 0 60px rgba(255, 175, 189, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .close-btn {
+            text-align: center;
+            color: var(--soft-rose);
+            margin-top: 20px;
+            cursor: pointer;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+        }
+
+        /* Removed the .viewed class entirely to allow replaying */
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light"></div>
+
+    <header>
+        <h1>Pick One</h1>
+        <div class="instruction">Every symbol holds a voice meant for you</div>
+    </header>
+
+    <div class="grid">
+        <div class="card" onclick="openPortal('anthonia.MOV')">
+            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
+        </div>
+
+        <div class="card" onclick="openPortal('mary.MOV')">
+            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
+        </div>
+
+        <div class="card" onclick="openPortal('jessica.MOV')">
+            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
+        </div>
+
+        <div class="card" onclick="openPortal('juliet.MOV')">
+            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
+        </div>
+
+        <div class="card" onclick="openPortal('deola.Mov')">
+            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
+        </div>
+
+        <div class="card" onclick="openPortal('ME.MP4')">
+            <img src="https://images.unsplash.com/photo-1507502707541-f369a3b18502?q=80&w=500" alt="Cloud">
+        </div>
+    </div>
+
+    <div id="videoModal">
+        <div class="modal-content">
+            <video id="mainVideo" controls></video>
+            <div class="close-btn" onclick="closePortal()">Return to the stars</div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('videoModal');
+        const video = document.getElementById('mainVideo');
+
+        function openPortal(src) {
+            // Removed card.classList.add('viewed') to allow replay
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 50);
+            video.src = src;
+            video.play();
+        }
+
+        function closePortal() {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                video.pause();
+                video.src = ""; // Clears the video source so it stops in the background
+            }, 800);
+        }
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closePortal();
+        });
+    </script>
+</body>
+</html>
